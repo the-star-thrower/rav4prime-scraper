@@ -1,5 +1,6 @@
 package coffee.buttfirst.rav4prime;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -7,6 +8,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Scanner;
 
+import static coffee.buttfirst.rav4prime.StaticsHelper.BLUEPRINT;
+import static coffee.buttfirst.rav4prime.StaticsHelper.SUPERSONIC_RED;
 import static coffee.buttfirst.rav4prime.Vehicle.createDefaultVehicle;
 
 public class ApiScraper {
@@ -23,23 +26,38 @@ public class ApiScraper {
 
         InputStream inputStream = urlWithVin.openStream();
         try {
-            Scanner scanner = new Scanner(inputStream);
-
-            //Write all the JSON data into a string using a scanner
-            String jsonResult = "";
-            while (scanner.hasNext()) {
-                jsonResult += scanner.nextLine();
-            }
+            var result = inputStreamToJsonString(inputStream);
 
             ObjectMapper mapper = new ObjectMapper();
-            Vehicle jsonText = mapper.readValue(jsonResult, Vehicle.class);
-            System.out.println(jsonText.toString());
+            JsonNode jsonNode = mapper.readTree(result);
+            final var exteriorColor = getExteriorColor(jsonNode);
+            if (isDesiredColor(exteriorColor))
+                System.out.println("oh shit waddup found the right color");;
         } finally {
             inputStream.close();
         }
 
         // TODO convert json to vehicle object
         return createDefaultVehicle();
+    }
+
+    private boolean isDesiredColor(String colorCode) {
+        return colorCode.equals(BLUEPRINT) || colorCode.equals(SUPERSONIC_RED);
+    }
+
+    private String getExteriorColor(JsonNode jsonNode) {
+        return jsonNode.get("extColor").get("colorCd").asText();
+    }
+
+    //Write all the JSON data into a string using a scanner
+    private String inputStreamToJsonString(InputStream inputStream) {
+        Scanner scanner = new Scanner(inputStream);
+
+        String stringResult = "";
+        while (scanner.hasNext()) {
+            stringResult += scanner.nextLine();
+        }
+        return stringResult;
     }
 
     private Vehicle convertJsonResultToVehicle() {

@@ -2,7 +2,7 @@ package coffee.buttfirst.rav4prime;
 
 import java.io.IOException;
 
-public class main {
+public class  main {
 
     public static void main(String args[]){
         final var scraper = new ApiScraper();
