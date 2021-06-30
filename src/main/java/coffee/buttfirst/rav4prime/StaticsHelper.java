@@ -2,7 +2,7 @@ package coffee.buttfirst.rav4prime;
 
 public class StaticsHelper {
     // Black/Red SofTex
-    static final String INTERIOR =  "EA20";
+    static final String BLACK_RED_SOFTEX =  "EA20";
 
     // Blueprint / Midnight Black Metallic roof
     static final String BLUEPRINT = "02RA";

@@ -8,15 +8,15 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Scanner;
 
-import static coffee.buttfirst.rav4prime.StaticsHelper.BLUEPRINT;
-import static coffee.buttfirst.rav4prime.StaticsHelper.SUPERSONIC_RED;
 import static coffee.buttfirst.rav4prime.Vehicle.createDefaultVehicle;
 
 public class ApiScraper {
     private static final String replacementText = "<VIN>";
     private static final String urlPattern = String.format("https://api.rti.toyota.com/marketplace-inventory/vehicles/%s?isVspec=true", replacementText);
+    private VehicleVerifier vehicleVerifier;
 
-    public ApiScraper() {
+    public ApiScraper(VehicleVerifier vehicleVerifier) {
+        this.vehicleVerifier = vehicleVerifier;
     }
 
     protected Vehicle getVehicle(String vin) throws IOException {
@@ -31,8 +31,17 @@ public class ApiScraper {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode jsonNode = mapper.readTree(result);
             final var exteriorColor = getExteriorColor(jsonNode);
-            if (isDesiredColor(exteriorColor))
-                System.out.println("oh shit waddup found the right color");;
+            if (vehicleVerifier.isDesiredExteriorColor(exteriorColor)) {
+                System.out.println("oh shit waddup found the right exterior color");
+            } else {
+                System.out.println("OHNO: wrong exterior color");
+            }
+            final var interiorColor = getInteriorColor(jsonNode);
+            if (vehicleVerifier.isDesiredInteriorColor(interiorColor)){
+                System.out.println("aww yiss right interior color too");
+            } else {
+                System.out.println("OHNO: wrong interior color");
+            }
         } finally {
             inputStream.close();
         }
@@ -41,12 +50,12 @@ public class ApiScraper {
         return createDefaultVehicle();
     }
 
-    private boolean isDesiredColor(String colorCode) {
-        return colorCode.equals(BLUEPRINT) || colorCode.equals(SUPERSONIC_RED);
-    }
-
     private String getExteriorColor(JsonNode jsonNode) {
         return jsonNode.get("extColor").get("colorCd").asText();
+    }
+
+    private String getInteriorColor(JsonNode jsonNode) {
+        return jsonNode.get("intColor").get("colorCd").asText();
     }
 
     //Write all the JSON data into a string using a scanner

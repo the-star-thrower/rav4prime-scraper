@@ -5,7 +5,7 @@ import java.io.IOException;
 public class  main {
 
     public static void main(String args[]){
-        final var scraper = new ApiScraper();
+        final var scraper = new ApiScraper(new VehicleVerifier());
         try {
             scraper.getVehicle("JTMFB3FV1MD046086");
         } catch (IOException e) {
